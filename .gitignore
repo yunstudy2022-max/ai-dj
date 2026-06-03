@@ -1,0 +1,35 @@
+# ── 敏感資訊（絕對不能上傳）──
+.env
+*.env
+.env.*
+!.env.example
+
+# ── Claude Code 本地設定 ──
+.claude/settings.local.json
+
+# ── 生成的音頻（體積大、不需版控）──
+audio_output/
+DJ_music/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# ── 個人筆記 / 工作日誌 ──
+MEMORY.md
+errors.md
+successes.md
+
+# ── 系統檔 ──
+.DS_Store
+Thumbs.db
+desktop.ini

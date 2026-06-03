@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>claudio.fm — late night, intentional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#1a1714;
+    --ink-2:#221d18;
+    --paper:#e8e0d2;
+    --paper-dim:#c9bfae;
+    --paper-faint:#8a8170;
+    --rule:#3a322a;
+    --moss:oklch(0.62 0.04 145);
+    --terra:oklch(0.62 0.07 45);
+    --ember:oklch(0.68 0.09 55);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--ink);color:var(--paper);min-height:100vh;font-family:"Cormorant Garamond","Noto Serif TC",serif;font-weight:400}
+  body{
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 20%, oklch(0.22 0.02 60 / 0.7), transparent 60%),
+      radial-gradient(ellipse 60% 80% at 10% 90%, oklch(0.20 0.03 30 / 0.6), transparent 70%),
+      var(--ink);
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:100;opacity:0.18;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.85 0 0 0 0 0.75 0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:99;
+    background:radial-gradient(ellipse at 50% 0%, transparent 60%, oklch(0.10 0.02 30 / 0.55) 100%);
+  }
+  .mono{font-family:"JetBrains Mono",monospace;font-weight:300;letter-spacing:0.02em}
+  .small-caps{font-variant:all-small-caps;letter-spacing:0.18em}
+
+  .stage{
+    position:relative;z-index:1;
+    display:grid;
+    grid-template-columns: 320px 1fr 380px;
+    grid-template-rows: auto 1fr auto;
+    gap:0;
+    min-height:100vh;
+    max-width:1640px;margin:0 auto;
+    padding:28px 36px 0;
+  }
+  header.bar{
+    grid-column:1 / -1;
+    display:flex;align-items:flex-end;justify-content:space-between;
+    padding-bottom:18px;border-bottom:1px solid var(--rule);
+    margin-bottom:24px;
+  }
+  .brand{display:flex;align-items:baseline;gap:14px}
+  .brand .mark{
+    width:38px;height:38px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--paper) 0%, var(--paper-dim) 40%, var(--ink-2) 75%);
+    box-shadow:inset 0 0 0 1px var(--rule), 0 1px 0 oklch(1 0 0 / 0.05);
+    position:relative;
+  }
+  .brand .mark::after{
+    content:"";position:absolute;inset:14px;border-radius:50%;background:var(--ink);
+    box-shadow:inset 0 0 0 1px var(--rule);
+  }
+  .brand h1{
+    font-weight:500;font-size:28px;letter-spacing:-0.01em;margin:0;line-height:1;
+    font-style:italic;
+  }
+  .brand .tag{color:var(--paper-faint);font-size:13px;margin-left:4px}
+  .barmeta{display:flex;align-items:center;gap:28px;color:var(--paper-faint)}
+  .barmeta .on-air{
+    display:inline-flex;align-items:center;gap:8px;color:var(--ember);
+  }
+  .barmeta .on-air .dot{width:8px;height:8px;border-radius:50%;background:var(--ember);box-shadow:0 0 12px var(--ember);animation:pulse 2.2s infinite ease-in-out}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.55;transform:scale(0.82)}}
+
+  .col{padding:6px 0}
+  .col-left{padding-right:30px;border-right:1px solid var(--rule)}
+  .col-mid{padding:0 38px}
+  .col-right{padding-left:30px;border-left:1px solid var(--rule)}
+
+  .sec-head{
+    display:flex;align-items:center;justify-content:space-between;
+    color:var(--paper-faint);font-size:11px;
+    padding-bottom:10px;margin-bottom:18px;border-bottom:1px dashed var(--rule);
+  }
+  .sec-head .num{font-style:italic;font-family:"Cormorant Garamond",serif;font-size:13px;letter-spacing:0;text-transform:none}
+
+  .chat{display:flex;flex-direction:column;gap:14px;max-height:60vh;overflow-y:auto;padding-right:6px;scroll-behavior:smooth}
+  .chat::-webkit-scrollbar{width:4px}
+  .chat::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
+  .msg{display:flex;flex-direction:column;gap:2px;animation:rise .55s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .msg .who{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--paper-faint);letter-spacing:0.04em}
+  .msg .who .t{opacity:0.6;margin-left:6px}
+  .msg .body{font-size:15px;color:var(--paper-dim);line-height:1.45;font-weight:300}
+  .msg.highlighted .body{color:var(--paper)}
+  .msg.viewer .who{color:var(--moss)}
+
+  .composer{margin-top:14px;display:flex;gap:8px;border-top:1px dashed var(--rule);padding-top:14px}
+  .composer input{
+    flex:1;background:transparent;border:none;outline:none;color:var(--paper);
+    font-family:"Noto Serif TC",serif;font-size:14px;padding:6px 0;border-bottom:1px solid var(--rule);
+  }
+  .composer input::placeholder{color:var(--paper-faint);font-style:italic}
+  .composer button{
+    background:transparent;border:1px solid var(--rule);color:var(--paper-dim);
+    font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.1em;
+    padding:6px 10px;cursor:pointer;transition:.2s;
+  }
+  .composer button:hover{border-color:var(--paper-dim);color:var(--paper)}
+
+  .center-wrap{
+    display:flex;flex-direction:column;align-items:stretch;gap:28px;
+    padding-top:6px;
+  }
+  .now-line{
+    display:flex;align-items:baseline;justify-content:space-between;color:var(--paper-faint);font-size:11px;
+  }
+  .now-line .track-no{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:22px;color:var(--paper-dim);letter-spacing:0}
+
+  .turntable{
+    position:relative;align-self:center;
+    width:min(440px, 100%);aspect-ratio:1/1;margin:6px 0 12px;
+  }
+  .vinyl{
+    position:absolute;inset:0;border-radius:50%;
+    background:
+      repeating-radial-gradient(circle at 50% 50%, oklch(0.18 0.01 30) 0 1px, oklch(0.14 0.01 30) 1px 3px),
+      radial-gradient(circle at 50% 50%, oklch(0.18 0.01 30), oklch(0.10 0.01 30));
+    box-shadow:
+      inset 0 0 60px oklch(0 0 0 / 0.6),
+      inset 0 0 0 1px oklch(0.30 0.02 50 / 0.4),
+      0 30px 60px oklch(0 0 0 / 0.6),
+      0 0 0 1px oklch(0.30 0.02 50 / 0.3);
+    animation:spin 8s linear infinite;
+  }
+  .vinyl.paused{animation-play-state:paused}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .vinyl::before{
+    content:"";position:absolute;inset:30%;border-radius:50%;
+    background:radial-gradient(circle, var(--ember), oklch(0.42 0.08 35) 60%, oklch(0.28 0.05 35) 100%);
+    box-shadow:inset 0 0 0 1px oklch(0 0 0 / 0.4);
+  }
+  .vinyl::after{
+    content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;
+    background:var(--ink);transform:translate(-50%,-50%);
+    box-shadow:0 0 0 1px var(--paper-faint);
+  }
+  .label-text{
+    position:absolute;inset:33%;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;
+  }
+  .label-text span{
+    color:var(--paper);font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;
+    opacity:0.85;letter-spacing:0.08em;
+  }
+  .tonearm{
+    position:absolute;top:-8%;right:-12%;width:55%;height:60%;
+    transform-origin:90% 10%;transform:rotate(-18deg);
+    pointer-events:none;
+    transition:transform 1.2s cubic-bezier(.6,.1,.2,1);
+  }
+  .tonearm.live{transform:rotate(4deg)}
+  .tonearm .arm{
+    position:absolute;top:8%;left:8%;width:84%;height:6px;
+    background:linear-gradient(180deg, oklch(0.78 0.01 70), oklch(0.55 0.01 70));
+    border-radius:3px;transform-origin:right;transform:rotate(28deg);
+    box-shadow:0 2px 4px oklch(0 0 0 / 0.5);
+  }
+  .tonearm .pivot{
+    position:absolute;top:0;right:0;width:42px;height:42px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, oklch(0.75 0.01 70), oklch(0.35 0.01 70));
+    box-shadow:0 4px 10px oklch(0 0 0 / 0.5), inset 0 0 0 1px oklch(0 0 0 / 0.3);
+  }
+  .tonearm .head{
+    position:absolute;bottom:0;left:0;width:48px;height:24px;
+    background:oklch(0.30 0.01 70);border-radius:4px;transform:rotate(28deg) translate(-2px, 8px);
+    box-shadow:0 2px 4px oklch(0 0 0 / 0.6);
+  }
+
+  .speech{
+    position:relative;
+    padding:30px 34px 32px;
+    background:linear-gradient(180deg, oklch(0.20 0.02 50 / 0.5), oklch(0.16 0.02 40 / 0.3));
+    border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    min-height:140px;
+  }
+  .speech::before, .speech::after{
+    content:"";position:absolute;width:18px;height:18px;border:1px solid var(--paper-faint);opacity:0.5;
+  }
+  .speech::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+  .speech::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+  .speech .label{
+    position:absolute;top:-9px;left:24px;background:var(--ink);padding:0 10px;
+    color:var(--paper-faint);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.18em;
+  }
+  .speech .body{
+    font-family:"Noto Serif TC","Cormorant Garamond",serif;font-weight:300;font-size:22px;line-height:1.55;
+    color:var(--paper);text-wrap:pretty;letter-spacing:0.01em;
+  }
+  .speech.empty .body{color:var(--paper-faint);font-style:italic}
+  .speech .body .caret{display:inline-block;width:8px;height:1.1em;background:var(--paper);vertical-align:-2px;margin-left:2px;animation:blink 1.1s steps(2) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  .controls{display:flex;align-items:center;gap:14px;justify-content:space-between}
+  .btn-broadcast{
+    display:inline-flex;align-items:center;gap:14px;
+    background:transparent;border:1px solid var(--paper-dim);color:var(--paper);
+    padding:14px 22px;cursor:pointer;transition:.25s;
+    font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:0.22em;
+  }
+  .btn-broadcast:hover:not(:disabled){background:var(--paper);color:var(--ink)}
+  .btn-broadcast:disabled{opacity:0.5;cursor:wait}
+  .btn-broadcast .glyph{width:8px;height:8px;background:var(--ember);border-radius:50%;box-shadow:0 0 10px var(--ember)}
+  .btn-broadcast:hover:not(:disabled) .glyph{background:var(--ink);box-shadow:none}
+
+  .toggle{display:inline-flex;align-items:center;gap:10px;color:var(--paper-faint);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.14em;cursor:pointer;user-select:none}
+  .toggle .sw{width:32px;height:14px;border:1px solid var(--rule);position:relative;background:var(--ink-2)}
+  .toggle .sw::after{content:"";position:absolute;top:1px;left:1px;width:10px;height:10px;background:var(--paper-faint);transition:.25s}
+  .toggle.on .sw{border-color:var(--moss)}
+  .toggle.on .sw::after{left:19px;background:var(--moss)}
+
+  .readout{display:flex;flex-direction:column;gap:24px}
+  .field{}
+  .field .k{
+    color:var(--paper-faint);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.18em;
+    margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;
+  }
+  .field .v{
+    font-family:"JetBrains Mono",monospace;font-size:12px;line-height:1.65;color:var(--paper);
+    font-weight:300;
+  }
+  .field.analysis .v{font-family:"Noto Serif TC",serif;font-size:14px;line-height:1.6;color:var(--paper-dim);font-style:italic}
+  .prompt-box{
+    background:oklch(0.10 0.01 40);border:1px solid var(--rule);padding:14px 16px;
+    font-family:"JetBrains Mono",monospace;font-size:11.5px;line-height:1.65;color:var(--moss);
+    word-break:break-word;white-space:pre-wrap;
+    min-height:80px;
+  }
+  .meter{display:flex;align-items:flex-end;gap:3px;height:34px;margin-top:6px}
+  .meter .b{flex:1;background:var(--paper-faint);opacity:0.55;transition:height .3s, background .3s}
+  .meter.live .b{background:var(--moss);opacity:0.9}
+
+  .ledger{display:flex;flex-direction:column;gap:10px;max-height:200px;overflow-y:auto;padding-right:4px}
+  .ledger::-webkit-scrollbar{width:3px}
+  .ledger::-webkit-scrollbar-thumb{background:var(--rule)}
+  .ledger .row{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dashed oklch(0.30 0.02 50 / 0.5);font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--paper-dim)}
+  .ledger .row .t{color:var(--paper-faint);min-width:46px}
+  .ledger .row .desc{flex:1;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;color:var(--paper-dim)}
+
+  footer.foot{
+    grid-column:1 / -1;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:18px 0 22px;margin-top:32px;border-top:1px solid var(--rule);
+    color:var(--paper-faint);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:0.18em;
+  }
+  footer .center{font-style:italic;font-family:"Cormorant Garamond",serif;font-size:14px;text-transform:none;letter-spacing:0.02em;color:var(--paper-dim)}
+
+  .err{color:var(--terra);font-family:"JetBrains Mono",monospace;font-size:11px;margin-top:6px}
+
+
+  /* ── Auto-pilot 倒數 ── */
+  .auto-row{display:flex;align-items:center;gap:14px}
+  .cd{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--paper-faint);letter-spacing:0.06em;white-space:nowrap}
+  .cd .n{color:var(--moss);font-size:12px}
+
+  /* ── 音量滑桿 ── */
+  .vol-row{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--paper-faint);letter-spacing:0.1em;margin-top:10px}
+  input[type=range].vol{-webkit-appearance:none;flex:1;height:2px;background:var(--rule);outline:none;cursor:pointer}
+  input[type=range].vol::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:var(--paper-faint);cursor:pointer;transition:.15s}
+  input[type=range].vol:hover::-webkit-slider-thumb{background:var(--paper)}
+
+  /* ── Suno 狀態 ── */
+  .suno-badge{
+    display:flex;align-items:center;gap:7px;
+    font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--moss);
+    padding:7px 10px;border:1px dashed oklch(0.45 0.04 145 / 0.45);
+    background:oklch(0.11 0.02 145 / 0.2);margin-top:10px;
+  }
+  .suno-badge .sdot{width:5px;height:5px;border-radius:50%;background:var(--moss);animation:pulse 1.1s infinite;flex-shrink:0}
+  .suno-badge.done{color:var(--paper-faint);border-color:var(--rule)}
+  .suno-badge.done .sdot{background:var(--paper-faint);animation:none}
+
+  /* ── DJ Control Panel ── */
+  .tab-bar{display:flex;border-bottom:1px solid var(--rule);margin-bottom:14px}
+  .tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--paper-faint);font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px 5px;cursor:pointer;margin-bottom:-1px;transition:color .2s}
+  .tab-btn.on{border-bottom-color:var(--ember);color:var(--paper)}
+  .ctrl-block{margin-bottom:18px}
+  .ctrl-lbl{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.1em;color:var(--paper-faint);text-transform:uppercase;margin-bottom:7px}
+  .cpills{display:flex;flex-wrap:wrap;gap:4px}
+  .cpill{background:transparent;border:1px solid oklch(0.3 0.02 60);color:var(--paper-faint);font-size:10px;font-family:"JetBrains Mono",monospace;padding:3px 9px;cursor:pointer;letter-spacing:.02em;transition:all .15s}
+  .cpill:hover{border-color:oklch(0.5 0.04 60);color:var(--paper-dim)}
+  .cpill.on{background:oklch(0.22 0.04 55);border-color:var(--ember);color:var(--ember)}
+  .cpill.tick{border-color:oklch(0.28 0.04 145);color:var(--moss)}
+  .cpill.tick.on{background:oklch(0.15 0.04 145 / 0.5);border-color:var(--moss);color:var(--moss)}
+  .ctrl-input{width:100%;background:oklch(0.14 0.01 45 / 0.8);border:1px solid var(--rule);color:var(--paper);font-family:"Noto Serif TC",serif;font-size:13px;padding:7px 10px;outline:none;box-sizing:border-box;margin-top:2px}
+  .ctrl-divider{border:none;border-top:1px dashed var(--rule);margin:16px 0}
+
+  /* ── Setup Screen ── */
+  .setup-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;position:relative;z-index:1}
+  .setup-card{width:100%;max-width:540px;display:flex;flex-direction:column}
+  .setup-hero{text-align:center;margin-bottom:52px}
+  .setup-hero h1{font-size:40px;font-style:italic;font-weight:500;letter-spacing:-.01em;margin:0 0 10px;line-height:1}
+  .setup-hero .sub{color:var(--paper-faint);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase}
+  .setup-section{border-top:1px dashed var(--rule);padding:20px 0}
+  .btn-enter{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;background:transparent;border:1px solid var(--paper-dim);color:var(--paper);font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;padding:18px;cursor:pointer;transition:.25s;margin-top:32px}
+  .btn-enter:hover{background:var(--paper);color:var(--ink)}
+  .btn-enter:hover .enter-dot{background:var(--ink);box-shadow:none}
+  .btn-enter .enter-dot{width:8px;height:8px;background:var(--ember);border-radius:50%;box-shadow:0 0 10px var(--ember);flex-shrink:0}
+  /* ── Countdown Screen ── */
+  .cd-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:1;gap:20px}
+  .cd-num{font-size:130px;font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:300;color:var(--paper);line-height:1;opacity:.9;animation:cd-pop .6s cubic-bezier(.3,1.3,.5,1)}
+  @keyframes cd-pop{from{opacity:0;transform:scale(1.2)}to{opacity:.9;transform:scale(1)}}
+  .cd-label{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;color:var(--paper-faint);text-transform:uppercase}
+  /* ── Logs Tab ── */
+  .log-list{display:flex;flex-direction:column;max-height:calc(100vh - 180px);overflow-y:auto}
+  .log-list::-webkit-scrollbar{width:3px}
+  .log-list::-webkit-scrollbar-thumb{background:var(--rule)}
+  .log-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid oklch(0.20 0.01 50/.4);font-family:"JetBrains Mono",monospace;font-size:10px;line-height:1.5;word-break:break-word}
+  .log-row .lt{color:var(--paper-faint);flex-shrink:0;min-width:58px}
+  .log-row .lv{flex-shrink:0;min-width:38px}
+  .log-row.info .lv{color:var(--paper-faint)}
+  .log-row.warn .lv{color:var(--ember)}
+  .log-row.error .lv{color:var(--terra)}
+  .log-row .lm{flex:1}
+  .log-row.info .lm{color:var(--paper-dim)}
+  .log-row.warn .lm{color:var(--paper)}
+  .log-row.error .lm{color:var(--terra)}
+
+  /* ── Now Playing ── */
+  .np{
+    display:flex;align-items:center;gap:8px;padding:9px 12px;margin-top:10px;
+    border:1px solid oklch(0.45 0.06 55 / 0.5);
+    background:oklch(0.14 0.02 50 / 0.3);
+  }
+  .np .ni{color:var(--ember);animation:pulse 2.2s infinite;font-size:13px}
+  .np .nn{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:14px;color:var(--paper);flex:1}
+  .np .nt{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--paper-faint);letter-spacing:0.1em;text-transform:uppercase}
+
+  /* ── Next Song Banner ── */
+  .next-song{
+    margin-top:16px;padding:14px 20px;
+    border:1px solid oklch(0.55 0.10 55 / 0.6);
+    background:oklch(0.14 0.04 50 / 0.5);
+    display:flex;flex-direction:column;gap:5px;
+    animation:rise .5s ease both;
+  }
+  .next-song .ns-label{
+    font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ember);
+  }
+  .next-song .ns-name{
+    font-family:"Cormorant Garamond",serif;font-style:italic;
+    font-size:26px;color:var(--paper);letter-spacing:.02em;line-height:1.2;
+  }
+
+  /* ── Composer textarea ── */
+  .composer{margin-top:14px;display:flex;gap:8px;align-items:flex-end;border-top:1px dashed var(--rule);padding-top:14px}
+  .composer textarea{
+    flex:1;background:transparent;border:none;outline:none;color:var(--paper);
+    font-family:"Noto Serif TC",serif;font-size:14px;padding:4px 0;
+    border-bottom:1px solid var(--rule);resize:none;line-height:1.6;min-height:44px;
+  }
+  .composer textarea::placeholder{color:var(--paper-faint);font-style:italic}
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel">
+  const { useState, useEffect, useRef, useCallback } = React;
+
+  // ── 主題留言池 ──────────────────────────────────────────────
+  const MSG_POOLS = {
+    base: [
+      { who: "ame_no_hi",    body: "為什麼凌晨總是特別誠實" },
+      { who: "lin_aaa",      body: "好像很久沒有這樣安靜地坐著了" },
+      { who: "still.life",   body: "茶涼了 但不想離開椅子" },
+      { who: "neon_dust",    body: "感覺整個城市只剩我醒著" },
+      { who: "elias.wav",    body: "this beat is everything rn" },
+      { who: "papermoon",    body: "聽著聽著就想哭欸" },
+      { who: "lantern77",    body: "AJ 今晚的選曲一直都很懂" },
+      { who: "midnight.cat", body: "Anyone else can't sleep tonight?" },
+      { who: "harukomori",   body: "コーヒーがもう冷めちゃった" },
+      { who: "drift.nine",   body: "open window + this music = perfection" },
+    ],
+    work: [
+      { who: "yuki_03",      body: "今晚加班好累，希望這首歌能撐我到三點" },
+      { who: "kuro_lo",      body: "下班路上 第三遍循環" },
+      { who: "grey_desk",    body: "PPT 做到一半 腦子空了" },
+      { who: "overtime.x",   body: "又是一個人在辦公室的夜晚" },
+      { who: "9to9er",       body: "今天沒有準時下班的人舉個手" },
+      { who: "coffee.last",  body: "第三杯咖啡 已經沒有用了" },
+      { who: "momo_w",       body: "終於交出去了 想哭的那種如釋重負" },
+      { who: "blur.hours",   body: "deadline 明天 但我只想聽歌" },
+      { who: "tiredbird",    body: "明明很累 卻不想睡 只想這樣坐著" },
+    ],
+    study: [
+      { who: "0o0_0o0",      body: "在寫論文…請給我力量" },
+      { who: "north_st",     body: "studying for finals, this helps so much" },
+      { who: "vellum_x",     body: "i've been staring at the same page for an hour" },
+      { who: "thesis.mode",  body: "論文卡關 來聽個歌再繼續" },
+      { who: "lib_ghost",    body: "圖書館快關了 只剩我還在" },
+      { who: "p.hd.life",    body: "教授說我的方向要修正 整個人麻了" },
+      { who: "exam.eve",     body: "明天考試 但腦子已經不想運作了" },
+      { who: "note_full",    body: "筆記本寫完第三本了 今天有進度" },
+      { who: "late.reader",  body: "reading week but make it crying" },
+    ],
+    insomnia: [
+      { who: "soft_focus",   body: "i miss someone i shouldn't" },
+      { who: "yu_quiet",     body: "想抽根菸 又戒了三個月了" },
+      { who: "sleepless_k",  body: "三點了 還是不想關燈" },
+      { who: "4am.again",    body: "睡不著已經是日常了" },
+      { who: "quiet.loop",   body: "同一首歌循環了好多遍 也沒有要睡的意思" },
+      { who: "insomniac",    body: "body is tired, brain won't quit" },
+      { who: "moon.typed",   body: "凌晨的念頭最重 也最真實" },
+      { who: "nocturn.al",   body: "失眠第幾天了 都忘記了" },
+      { who: "3am.thoughts", body: "想了很多 又不知道在想什麼" },
+    ],
+    rain: [
+      { who: "rainwalker",   body: "下雨了 配合這個節奏剛剛好" },
+      { who: "moss_room",    body: "外面下雪了 你那邊呢" },
+      { who: "wet.window",   body: "雨打在窗上 心情說不上來" },
+      { who: "grey.skies",   body: "下雨天就該聽這種音樂" },
+      { who: "umbrella_k",   body: "淋濕回家 換上乾衣服 還是覺得空空的" },
+      { who: "fog.walk",     body: "雨天的城市特別安靜 特別孤單" },
+      { who: "puddle.step",  body: "今天的雨剛好 大概是老天也累了" },
+    ],
+    weekend: [
+      { who: "fri.night",    body: "週五晚上什麼都不想做 就想這樣" },
+      { who: "lazy.sun",     body: "假日耍廢中 這首很搭" },
+      { who: "saturdaze",    body: "週末的夜晚好像特別長" },
+      { who: "slow.sat",     body: "沒有計畫的週末 才是真正的休息" },
+      { who: "dim.sunday",   body: "週日夜晚的憂鬱又來了" },
+      { who: "couch.mode",   body: "躺了一整天 終於覺得活過來了" },
+    ],
+    lonely: [
+      { who: "sen.ma",       body: "想念家裡的味道" },
+      { who: "solo.dine",    body: "一個人吃飯的時候最需要背景音樂" },
+      { who: "faraway.j",    body: "離家第三年 偶爾還是會想哭" },
+      { who: "empty.seat",   body: "今天想打電話給某個人 但沒有撥出去" },
+      { who: "two.am.text",  body: "有沒有人也是 想說的話最後都沒說" },
+      { who: "unread.msg",   body: "想念某個人但對方不知道" },
+      { who: "leftover.tea", body: "泡了兩杯茶 只喝了一杯" },
+    ],
+  };
+
+  // 依主題關鍵字挑選並洗牌留言池
+  function buildSeedPool(theme = "") {
+    const t = theme.toLowerCase();
+    const match = (kws) => kws.some(k => t.includes(k));
+    const picked = [...MSG_POOLS.base];
+    if (!theme || match(["加班","上班","工作","overtime","work","職場","deadline"]))
+      picked.push(...MSG_POOLS.work);
+    if (match(["學生","論文","考試","study","exam","圖書館","期末"]))
+      picked.push(...MSG_POOLS.study);
+    if (match(["失眠","睡不著","insomnia","夜晚","凌晨","深夜"]))
+      picked.push(...MSG_POOLS.insomnia);
+    if (match(["雨","下雨","rain","snow","下雪","天氣"]))
+      picked.push(...MSG_POOLS.rain);
+    if (match(["週末","週五","週六","friday","weekend","假日","放假"]))
+      picked.push(...MSG_POOLS.weekend);
+    if (match(["孤單","思念","想念","lonely","一個人","寂寞"]))
+      picked.push(...MSG_POOLS.lonely);
+    // 沒有任何主題關鍵字命中時，補入所有池做 general 深夜氛圍
+    if (picked.length === MSG_POOLS.base.length)
+      picked.push(...MSG_POOLS.insomnia, ...MSG_POOLS.work.slice(0,4));
+    // Fisher-Yates 洗牌
+    for (let i = picked.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [picked[i], picked[j]] = [picked[j], picked[i]];
+    }
+    return picked;
+  }
+
+  const pad = n => String(n).padStart(2,"0");
+  const nowHHMM = (d=new Date()) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const nowHHMMSS = (d=new Date()) => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+  const MODE_WEIGHTS = [
+    ["motivation",    50],
+    ["humor",         25],
+    ["chat_reaction", 15],
+    ["song_premiere", 10],
+  ];
+  const MODE_LABELS = {
+    chat_reaction: "聊天回應",
+    motivation:     "說句鼓勵",
+    humor:          "說個笑話",
+    song_premiere:  "新曲首播",
+  };
+
+  const AJ_LOADING_ACTIONS = [
+    "AJ 思考中",
+    "AJ 調整麥克風",
+    "AJ 起來動一動",
+    "AJ 喝了口水",
+    "AJ 看了看窗外",
+    "AJ 翻了翻筆記",
+    "AJ 換了個姿勢",
+    "AJ 發了一下呆",
+    "AJ 整理了一下思緒",
+    "AJ 深吸一口氣",
+    "AJ 盯著螢幕出神",
+    "AJ 輕輕敲了敲桌子",
+  ];
+  const pickLoadingAction = () => AJ_LOADING_ACTIONS[Math.floor(Math.random() * AJ_LOADING_ACTIONS.length)];
+  const pickMode = () => {
+    const total = MODE_WEIGHTS.reduce((s, [, w]) => s + w, 0);
+    let r = Math.random() * total;
+    for (const [m, w] of MODE_WEIGHTS) { r -= w; if (r <= 0) return m; }
+    return "chat_reaction";
+  };
+
+  function Typewriter({ text, speed=24, onDone }){
+    const [out, setOut] = useState("");
+    useEffect(()=>{
+      setOut("");
+      if(!text) return;
+      let i=0; let cancelled=false;
+      const tick = () => {
+        if(cancelled) return;
+        i++; setOut(text.slice(0,i));
+        if(i<text.length) setTimeout(tick, speed);
+        else onDone && onDone();
+      };
+      tick();
+      return ()=>{ cancelled=true; };
+    }, [text]);
+    return <span>{out}<span className="caret" /></span>;
+  }
+
+  function Meter({ live }){
+    const [bars, setBars] = useState(Array(22).fill(20));
+    useEffect(()=>{
+      const id = setInterval(()=>{
+        setBars(b => b.map(()=> {
+          const base = live ? 40 : 15;
+          const amp = live ? 55 : 18;
+          return base + Math.random()*amp;
+        }));
+      }, live ? 120 : 280);
+      return ()=> clearInterval(id);
+    }, [live]);
+    return (
+      <div className={"meter " + (live?"live":"")}>
+        {bars.map((h,i)=> <div key={i} className="b" style={{height: h+"%"}} />)}
+      </div>
+    );
+  }
+
+  function App(){
+    const [messages, setMessages] = useState([]);
+    const [seedIdx, setSeedIdx] = useState(0);
+    const seedPoolRef = useRef(buildSeedPool(""));
+    const [draft, setDraft] = useState("");
+    const [trackNo, setTrackNo] = useState(7);
+    const [loading, setLoading] = useState(false);
+    const [loadingAction, setLoadingAction] = useState("");
+    const [err, setErr] = useState("");
+    const [dj, setDj] = useState({
+      analysis: "",
+      dj_speech: "夜深了。歡迎來到這裡。我是你的朋友 AJ，今晚不急 — 讓聲音慢慢把你接住。",
+      music_prompt: "",
+    });
+    const [auto, setAuto] = useState(true);
+    const [timeStr, setTimeStr] = useState(nowHHMMSS());
+    const [typedDone, setTypedDone] = useState(false);
+    const [ledger, setLedger] = useState([
+      { t: nowHHMM(), desc: "warm welcome — easing into the hour" },
+    ]);
+    const chatRef  = useRef(null);
+    const wsRef    = useRef(null);
+    const ttsRef   = useRef(null);
+    const sunoRef  = useRef(null);
+    const sunoCountRef = useRef(0);
+    const [ttsUrl,  setTtsUrl]  = useState("");
+    const [musicUrl, setMusicUrl] = useState("");
+    const [sending,  setSending]  = useState(false);
+    const [modMsg,   setModMsg]   = useState("");
+    const [currentMode, setCurrentMode] = useState("chat_reaction");
+    const [sunoStatus, setSunoStatus] = useState("");
+    const [sunoSongName, setSunoSongName] = useState("");
+    const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+    const [volume, setVolume] = useState(0.85);
+    const [countdown, setCountdown] = useState(25);
+    const messagesRef    = useRef([]);
+    const ttsEndedRef    = useRef(false);
+    const playingLibRef  = useRef(false);   // 正在播放曲庫舊曲
+    const libraryRef     = useRef([]);
+    const ambientNodesRef = useRef(null);   // Web Audio 環境音 fallback
+    const [library, setLibrary] = useState([]);
+    const [audioUnlocked, setAudioUnlocked] = useState(false);
+    const [wsConnected,   setWsConnected]   = useState(false);
+    const [speechReady,   setSpeechReady]   = useState(false);
+    const [sessionTheme,  setSessionTheme]  = useState("");
+    const scriptHistoryRef = useRef([]);  // AJ 說過的最近 5 段話
+    const [rightTab,      setRightTab]      = useState("console");
+    const [intervalSec,   setIntervalSec]   = useState(25);
+    const [forcedPersona, setForcedPersona] = useState("");
+    const [forcedMusic,   setForcedMusic]   = useState("");
+    const [sunoEnabled,   setSunoEnabled]   = useState(true);
+    const [voiceId,       setVoiceId]       = useState("claudio");
+    const [enabledModes,  setEnabledModes]  = useState(["chat_reaction","motivation","humor","song_premiere"]);
+    const intervalRef = useRef(25);
+    const [phase, setPhase] = useState("setup");
+    const [countdownNum, setCountdownNum] = useState(5);
+    const [logs, setLogs] = useState([{t: nowHHMMSS(), level:"info", msg:"系統就緒，等待進入電台"}]);
+    const phaseRef = useRef("setup");
+
+    useEffect(()=>{ intervalRef.current = intervalSec; }, [intervalSec]);
+    useEffect(()=>{ phaseRef.current = phase; }, [phase]);
+
+    const addLog = useCallback((level, msg) => {
+      setLogs(l => [{t: nowHHMMSS(), level, msg}, ...l].slice(0, 300));
+    }, []);
+
+    const enterStation = useCallback(() => {
+      seedPoolRef.current = buildSeedPool(sessionTheme);
+      setSeedIdx(0);
+      setMessages([]);
+      setPhase("countdown");
+      phaseRef.current = "countdown";
+      let n = 5;
+      const tick = () => {
+        n--;
+        setCountdownNum(n);
+        if (n <= 0) {
+          setPhase("live");
+          phaseRef.current = "live";
+        } else {
+          setTimeout(tick, 1000);
+        }
+      };
+      setTimeout(tick, 1000);
+    }, [sessionTheme]);
+
+    // 同步 messages / library 到 ref
+    useEffect(()=>{ messagesRef.current = messages; }, [messages]);
+    useEffect(()=>{ libraryRef.current  = library;  }, [library]);
+
+    // 解鎖瀏覽器音訊 autoplay（需任意一次使用者互動）
+    useEffect(()=>{
+      const unlock = () => setAudioUnlocked(true);
+      document.addEventListener('click',   unlock, {once: true});
+      document.addEventListener('keydown', unlock, {once: true});
+      return ()=>{
+        document.removeEventListener('click',   unlock);
+        document.removeEventListener('keydown', unlock);
+      };
+    }, []);
+
+    // 載入曲庫
+    useEffect(()=>{
+      fetch("/api/library")
+        .then(r=>r.json())
+        .then(d=> setLibrary(d.tracks || []))
+        .catch(()=>{});
+    }, []);
+
+    // 時鐘
+    useEffect(()=>{
+      const id = setInterval(()=> setTimeStr(nowHHMMSS()), 1000);
+      return ()=> clearInterval(id);
+    },[]);
+
+    // 模擬聊天滾動（依 seedPoolRef 動態池循環）
+    useEffect(()=>{
+      const id = setInterval(()=>{
+        setSeedIdx(i => {
+          const pool = seedPoolRef.current;
+          const next = pool[i % pool.length];
+          setMessages(m => [...m, { ...next, t: nowHHMM(), id: Date.now()+Math.random() }].slice(-40));
+          return i+1;
+        });
+      }, 2600 + Math.random()*1400);
+      return ()=> clearInterval(id);
+    },[]);
+
+    useEffect(()=>{
+      const el = chatRef.current;
+      if(el) el.scrollTop = el.scrollHeight;
+    }, [messages]);
+
+    // WebSocket 連線
+    useEffect(()=>{
+      const connect = () => {
+        const ws = new WebSocket(`ws://${location.host}/ws`);
+        wsRef.current = ws;
+
+        ws.onopen  = () => { setWsConnected(true); addLog("info", "後端 WebSocket 連線成功"); };
+        ws.onclose = () => { setWsConnected(false); addLog("warn", "後端連線中斷，2 秒後重連…"); setTimeout(connect, 2000); };
+        ws.onmessage = (e) => {
+          const { event, data } = JSON.parse(e.data);
+
+          if (event === "step") {
+            if (data.step === 1 && data.status === "done") {
+              setDj(d => ({ ...d, analysis: data.summary || `${data.mood} · ${data.emotion}` }));
+              addLog("info", `情緒分析：${data.mood || "—"} / ${data.emotion || "—"}`);
+            }
+            if (data.step === 2 && data.status === "done") {
+              setDj(d => ({ ...d, dj_speech: data.script }));
+              setTypedDone(false);
+              setSpeechReady(true);
+              scriptHistoryRef.current = [...scriptHistoryRef.current, data.script].slice(-5);
+              setSunoSongName(data.song_name || "");
+              const ledgerDesc = data.song_name
+                ? `${data.persona} — ♪ ${data.song_name}`
+                : `${data.persona} — ${data.script.slice(0,20)}…`;
+              setLedger(l => [{ t: nowHHMM(), desc: ledgerDesc }, ...l].slice(0,30));
+              setTrackNo(n => n+1);
+              addLog("info", `AJ 台詞：${(data.script||"").slice(0,28)}…`);
+            }
+            if (data.step === 3 && data.status === "waiting") {
+              setSunoStatus("waiting");
+              if (data.song_name) setSunoSongName(data.song_name);
+              addLog("info", data.song_name ? `♪ 「${data.song_name}」生成中…` : (data.msg || "Suno 音樂生成中…"));
+            }
+            if (data.step === 3 && data.status === "done") {
+              setSunoStatus(data.music_url ? "done" : "");
+              if (data.music_url) {
+                setMusicUrl(data.music_url);
+                setDj(d => ({ ...d, music_prompt: data.music_url }));
+                addLog("info", `♪ 音樂就緒：${data.song_name || data.music_url}`);
+              } else {
+                addLog("warn", data.msg || "Suno 未回傳音樂（冷卻中或積分不足）");
+              }
+            }
+            if (data.step === 4 && data.status === "done") {
+              setTtsUrl(data.audio_url);
+              addLog("info", "TTS 語音生成完成");
+            }
+          }
+
+          if (event === "music_ready" && data.music_url) {
+            setMusicUrl(data.music_url);
+            const label = data.song_name
+              ? `♪ ${data.song_name}  —  ${data.music_url}`
+              : data.music_url;
+            setDj(d => ({ ...d, music_prompt: label }));
+            // 加進曲庫供下次墊場用
+            if (data.music_url.startsWith("/audio/")) {
+              setLibrary(l => [data.music_url, ...l.filter(t => t !== data.music_url)].slice(0, 60));
+            }
+          }
+          if (event === "error") {
+            const errMsg = data.msg || "發生未知錯誤";
+            setErr(errMsg);
+            addLog("error", `[step ${data.step || "?"}] ${errMsg}`);
+          }
+          if (event === "done") {
+            setLoading(false);
+            addLog("info", "本輪廣播完成");
+          }
+        };
+
+      };
+      connect();
+    }, []);
+
+    // ── 環境音 fallback（曲庫空時防止靜默）──────────────────
+    const startAmbient = useCallback(() => {
+      if (ambientNodesRef.current) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 3);
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 600;
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        // 兩個微調諧的 sine 波，產生輕柔拍頻
+        const o1 = ctx.createOscillator();
+        o1.type = "sine"; o1.frequency.value = 432;
+        o1.connect(filter); o1.start();
+        const o2 = ctx.createOscillator();
+        o2.type = "sine"; o2.frequency.value = 432.7;
+        o2.connect(filter); o2.start();
+        ambientNodesRef.current = { ctx, gain, o1, o2 };
+      } catch(e) {}
+    }, []);
+
+    const stopAmbient = useCallback(() => {
+      if (!ambientNodesRef.current) return;
+      const { ctx, gain, o1, o2 } = ambientNodesRef.current;
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.5);
+      setTimeout(() => {
+        try { o1.stop(); o2.stop(); ctx.close(); } catch(e) {}
+        ambientNodesRef.current = null;
+      }, 1600);
+    }, []);
+
+    // TTS 播完 → 優先播新 Suno；若尚未生成則先播曲庫舊曲；曲庫也空則啟動環境音
+    const handleTtsEnded = useCallback(() => {
+      ttsEndedRef.current = true;
+      if (musicUrl && sunoRef.current) {
+        stopAmbient();
+        playingLibRef.current = false;
+        sunoCountRef.current = 0;
+        sunoRef.current.src = musicUrl;
+        sunoRef.current.play().catch(()=>{});
+      } else if (libraryRef.current.length > 0 && sunoRef.current) {
+        stopAmbient();
+        const idx = Math.floor(Math.random() * libraryRef.current.length);
+        playingLibRef.current = true;
+        sunoRef.current.src = libraryRef.current[idx];
+        sunoRef.current.play().catch(()=>{});
+      } else {
+        // 曲庫是空的，Suno 還在生成 → 輕柔環境音墊場
+        startAmbient();
+      }
+    }, [musicUrl, startAmbient, stopAmbient]);
+
+    const handleSunoEnded = useCallback(() => {
+      if (playingLibRef.current) {
+        // 舊曲結束 → 繼續隨機播下一首舊曲
+        const tracks = libraryRef.current;
+        if (tracks.length > 0 && sunoRef.current) {
+          const idx = Math.floor(Math.random() * tracks.length);
+          sunoRef.current.src = tracks[idx];
+          sunoRef.current.play().catch(()=>{});
+        } else {
+          playingLibRef.current = false;
+          setIsPlayingMusic(false);
+        }
+        return;
+      }
+      // 新曲結束 → 循環 2 次
+      sunoCountRef.current += 1;
+      if (sunoCountRef.current < 2 && sunoRef.current) {
+        sunoRef.current.currentTime = 0;
+        sunoRef.current.play().catch(()=>{});
+      } else {
+        setIsPlayingMusic(false);
+      }
+    }, []);
+
+    // TTS URL 變化時自動播放；audioUnlocked 變化時補播（解決 autoplay 封鎖）
+    useEffect(()=>{
+      if (!ttsUrl || !ttsRef.current) return;
+      ttsEndedRef.current = false;
+      ttsRef.current.src = ttsUrl;
+      if (audioUnlocked) {
+        ttsRef.current.play().catch(()=>{});
+      }
+    }, [ttsUrl, audioUnlocked]);
+
+    // 新曲 URL 到達時：
+    //   a) TTS 已結束 → 停環境音、立即播新曲
+    //   b) 正在播舊曲 → 停環境音、切換到新曲
+    useEffect(()=>{
+      if (!musicUrl || !sunoRef.current) return;
+      stopAmbient();
+      if (ttsEndedRef.current) {
+        playingLibRef.current = false;
+        sunoCountRef.current = 0;
+        sunoRef.current.src = musicUrl;
+        sunoRef.current.play().catch(()=>{});
+      }
+    }, [musicUrl, stopAmbient]);
+
+    // 音量同步到兩個 audio 元素
+    useEffect(()=>{
+      if(ttsRef.current)  ttsRef.current.volume  = volume;
+      if(sunoRef.current) sunoRef.current.volume = volume;
+    }, [volume]);
+
+    // auto-pilot：首次 6 秒後觸發，之後每 25 秒重試
+    // 使用 ref 避免 stale closure，且不依賴 loading 狀態（loading 變化不會中止計時器）
+    const broadcastRef = useRef(null);  // .current 在 broadcast 宣告後立即賦值（見下方）
+
+    const autoPilotRef = useRef(null);
+    const nextFireRef  = useRef(Date.now() + 6000);
+
+    useEffect(()=>{
+      if(!auto){ clearTimeout(autoPilotRef.current); return; }
+      const schedule = (delay) => {
+        clearTimeout(autoPilotRef.current);
+        nextFireRef.current = Date.now() + delay;
+        autoPilotRef.current = setTimeout(()=>{
+          broadcastRef.current?.();
+          schedule(intervalRef.current * 1000);
+        }, delay);
+      };
+      schedule(6000);
+      return ()=> clearTimeout(autoPilotRef.current);
+    }, [auto]);
+
+    // auto-pilot 倒數顯示
+    useEffect(()=>{
+      if(!auto){ setCountdown(25); return; }
+      const id = setInterval(()=>{
+        const rem = Math.ceil((nextFireRef.current - Date.now()) / 1000);
+        setCountdown(Math.max(1, rem));
+      }, 300);
+      return ()=> clearInterval(id);
+    }, [auto]);
+
+    const sendDraft = async () => {
+      if (!draft.trim() || sending) return;
+      setSending(true);
+      setModMsg("");
+      try {
+        const res = await fetch("/api/moderate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: draft.trim() }),
+        });
+        const result = await res.json();
+        if (result.passed) {
+          setMessages(m => [...m, { who: "you", body: draft.trim(), t: nowHHMM(), viewer: true, id: Date.now() }]);
+          setDraft("");
+          setModMsg("");
+        } else {
+          setModMsg(result.message || "訊息遭攔截，請修改後再試。");
+        }
+      } catch(_) {
+        // 審查服務異常時放行，不擋用戶
+        setMessages(m => [...m, { who: "you", body: draft.trim(), t: nowHHMM(), viewer: true, id: Date.now() }]);
+        setDraft("");
+      }
+      setSending(false);
+    };
+
+    const broadcast = useCallback(() => {
+      if(phaseRef.current !== "live") return;
+      if(loading) return;
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        const msg = "後端未連線，請確認 server.py 正在執行";
+        setErr(msg);
+        addLog("error", msg);
+        return;
+      }
+      const recent = messagesRef.current.slice(-12).map(m => m.body);
+      if (!recent.length) {
+        setErr("聊天室還沒有訊息，請等一下");
+        return;
+      }
+      // 依啟用模式加權隨機選模式
+      const pickEnabled = () => {
+        const pool = MODE_WEIGHTS.filter(([m]) => enabledModes.includes(m));
+        if(!pool.length) return "chat_reaction";
+        const total = pool.reduce((s,[,w])=>s+w,0);
+        let r = Math.random()*total;
+        for(const [m,w] of pool){ r-=w; if(r<=0) return m; }
+        return pool[0][0];
+      };
+      const mode = pickEnabled();
+      setCurrentMode(mode);
+      setLoading(true); setLoadingAction(pickLoadingAction()); setErr(""); setTypedDone(false); setSpeechReady(false);
+      setTtsUrl(""); setMusicUrl("");
+      setSunoStatus(""); setSunoSongName(""); setIsPlayingMusic(false);
+      ws.send(JSON.stringify({
+        messages:       recent,
+        mode,
+        theme:          sessionTheme.trim(),
+        forced_persona: forcedPersona,
+        forced_music:   forcedMusic,
+        suno_enabled:   sunoEnabled,
+        script_history: scriptHistoryRef.current,
+        voice_id:       voiceId,
+      }));
+    }, [loading, enabledModes, sessionTheme, forcedPersona, forcedMusic, sunoEnabled, voiceId]);
+    broadcastRef.current = broadcast;  // 每次渲染同步，確保無 stale closure
+
+    const AUDIO_NODES = <>
+      <audio ref={ttsRef} onEnded={handleTtsEnded} style={{display:"none"}} />
+      <audio ref={sunoRef} onPlay={()=>setIsPlayingMusic(true)} onEnded={handleSunoEnded} style={{display:"none"}} />
+    </>;
+
+    const UNLOCK_BANNER = !audioUnlocked && (
+      <div onClick={()=>setAudioUnlocked(true)} style={{
+        position:'fixed', top:0, left:0, right:0, zIndex:9999,
+        background:'oklch(0.18 0.05 55 / 0.97)', padding:'10px 20px',
+        textAlign:'center', cursor:'pointer',
+        fontFamily:"'JetBrains Mono',monospace", fontSize:'12px',
+        letterSpacing:'.08em', color:'var(--paper-dim)',
+        borderBottom:'1px solid oklch(0.35 0.04 55)'
+      }}>
+        ▶ &nbsp;點擊任意處以解鎖音訊
+      </div>
+    );
+
+    if (phase === "setup") return (
+      <>
+        {UNLOCK_BANNER}
+        {AUDIO_NODES}
+        <div className="setup-screen">
+          <div className="setup-card">
+            <div className="setup-hero">
+              <h1>我是你的朋友<span style={{color:"var(--ember)"}}> - AJ</span></h1>
+              <div className="sub mono small-caps">深夜廣播設定 · claudio.fm</div>
+            </div>
+            <div className="setup-section">
+              <div className="ctrl-lbl">今晚主題 tonight's theme</div>
+              <input className="ctrl-input" type="text" value={sessionTheme}
+                onChange={e=>setSessionTheme(e.target.value)}
+                placeholder="深夜加班族、失眠的人、週五夜晚…（選填）" />
+            </div>
+            <div className="setup-section">
+              <div className="ctrl-lbl">廣播間隔 interval</div>
+              <div className="cpills">
+                {[[25,"25s"],[30,"30s"],[35,"35s"],[45,"45s"],[60,"1min"],[120,"2min"]].map(([v,lbl])=>(
+                  <button key={v} className={"cpill "+(intervalSec===v?"on":"")} onClick={()=>setIntervalSec(v)}>{lbl}</button>
+                ))}
+              </div>
+              <div style={{color:"var(--paper-faint)",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",letterSpacing:"0.12em",marginTop:"6px"}}>
+                暖場 25–35s　·　深夜 45s–1min
+              </div>
+            </div>
+            <div className="setup-section">
+              <div className="ctrl-lbl">時段人設 persona</div>
+              <div className="cpills">
+                {[["","自動 auto"],["evening","晚安下班了"],["midnight","深夜吧檯"],["late_night","I人的时光"]].map(([v,lbl])=>(
+                  <button key={v} className={"cpill "+(forcedPersona===v?"on":"")} onClick={()=>setForcedPersona(v)}>{lbl}</button>
+                ))}
+              </div>
+            </div>
+            <div className="setup-section">
+              <div className="ctrl-lbl">音樂風格 music style</div>
+              <div className="cpills">
+                {[["","自動"],["A1","A1 情感療癒"],["A2","A2 專注"],["A3","A3 勵志"],["A4","A4 助眠"],["C1","C1 星光"],["D3","D3 森林"],["E1","E1 深層睡眠"]].map(([v,lbl])=>(
+                  <button key={v} className={"cpill "+(forcedMusic===v?"on":"")} onClick={()=>setForcedMusic(v)}>{lbl}</button>
+                ))}
+              </div>
+            </div>
+            <div className="setup-section">
+              <div className="ctrl-lbl">Suno 音樂生成</div>
+              <div className="cpills">
+                <button className={"cpill "+(sunoEnabled?"on":"")} onClick={()=>setSunoEnabled(true)}>開啟</button>
+                <button className={"cpill "+(!sunoEnabled?"on":"")} onClick={()=>setSunoEnabled(false)}>關閉（僅 TTS）</button>
+              </div>
+            </div>
+            <div className="setup-section">
+              <div className="ctrl-lbl">主持人音色 voice</div>
+              <div className="cpills">
+                <button className={"cpill "+(voiceId==="claudio"?"on":"")} onClick={()=>setVoiceId("claudio")}>Claudio（試）</button>
+                <button className={"cpill "+(voiceId==="aj"?"on":"")} onClick={()=>setVoiceId("aj")}>AJ</button>
+                <button className={"cpill "+(voiceId==="adam"?"on":"")} onClick={()=>setVoiceId("adam")}>Adam</button>
+              </div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--paper-faint)",marginTop:6,letterSpacing:".04em"}}>
+                {voiceId==="claudio" ? "kbrsaic1zriFXx1pgRYN" : voiceId==="aj" ? "9lHjugDhwqoxA5MhX0az" : "pNInz6obpgDQGcFmaJgB"}
+              </div>
+            </div>
+            <button className="btn-enter" onClick={enterStation}>
+              <span className="enter-dot" />
+              進入電台
+            </button>
+          </div>
+        </div>
+      </>
+    );
+
+    if (phase === "countdown") return (
+      <>
+        {AUDIO_NODES}
+        <div className="cd-screen">
+          <div className="cd-num" key={countdownNum}>{countdownNum}</div>
+          <div className="cd-label">正在進入頻道…</div>
+        </div>
+      </>
+    );
+
+    return (
+      <div className="stage">
+        {/* 音訊解鎖提示（瀏覽器 autoplay 政策） */}
+        {UNLOCK_BANNER}
+
+        {/* 隱藏音頻：TTS → Suno 串接 */}
+        {AUDIO_NODES}
+
+        <header className="bar">
+          <div className="brand">
+            <div className="mark" />
+            <div>
+              <h1>我是你的朋友<span style={{color:"var(--ember)"}}> - AJ</span></h1>
+              <div className="tag mono small-caps">late night · intentional · est. 23:00</div>
+            </div>
+          </div>
+          <div className="barmeta mono small-caps">
+            <span>{timeStr}</span>
+            <span>frequency&nbsp;·&nbsp;88.4</span>
+            <span className="on-air"><span className="dot" />on air</span>
+          </div>
+        </header>
+
+        <section className="col col-left">
+          <div className="sec-head mono small-caps">
+            <span>live chat</span>
+            <span className="num">i.</span>
+          </div>
+          <div className="chat" ref={chatRef}>
+            {messages.length === 0 && (
+              <div style={{color:"var(--paper-faint)",fontStyle:"italic",fontSize:14}}>
+                聊天室還很安靜… 訊息會慢慢進來。
+              </div>
+            )}
+            {messages.map((m, i) => (
+              <div key={m.id} className={"msg " + (m.viewer ? "viewer " : "") + (i >= messages.length-3 ? "highlighted":"")}>
+                <div className="who mono">@{m.who}<span className="t">{m.t}</span></div>
+                <div className="body">{m.body}</div>
+              </div>
+            ))}
+          </div>
+          {modMsg && (
+            <div style={{
+              marginTop:"10px", padding:"8px 12px",
+              border:"1px solid oklch(0.5 0.1 20 / 0.6)",
+              color:"oklch(0.72 0.08 20)", fontSize:"12px",
+              fontFamily:"'Noto Serif TC',serif", lineHeight:1.6,
+              background:"oklch(0.12 0.02 20 / 0.4)", borderRadius:"1px"
+            }}>
+              {modMsg}
+            </div>
+          )}
+          <div className="composer">
+            <textarea
+              value={draft}
+              rows={2}
+              onChange={e=>{ setDraft(e.target.value); setModMsg(""); }}
+              onKeyDown={e=>{
+                if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendDraft(); }
+              }}
+              placeholder={"留言給 AJ…\n(Enter 送出，Shift+Enter 換行)"}
+              disabled={sending}
+              style={{opacity: sending ? 0.5 : 1}}
+            />
+            <button onClick={sendDraft} disabled={sending} style={{opacity: sending ? 0.5 : 1}}>
+              {sending ? "…" : "send"}
+            </button>
+          </div>
+        </section>
+
+        <section className="col col-mid">
+          <div className="center-wrap">
+            <div className="now-line">
+              <span className="mono small-caps">now spinning</span>
+              <span className="track-no">track № {String(trackNo).padStart(2,"0")}</span>
+              <span className="mono small-caps">side b</span>
+            </div>
+
+            <div className="turntable">
+              <div className={"vinyl " + (loading? "paused":"")}>
+                <div className="label-text"><span>AJ</span></div>
+              </div>
+              <div className={"tonearm " + (loading? "":"live")}>
+                <div className="pivot" />
+                <div className="arm" />
+                <div className="head" />
+              </div>
+            </div>
+
+            <div className={"speech " + (!dj.dj_speech ? "empty":"")}>
+              <span className="label">dj</span>
+              <div className="body">
+                {loading && !speechReady
+                  ? <span style={{color:"var(--paper-faint)",fontStyle:"italic"}}>{loadingAction}…<span className="caret"/></span>
+                  : !typedDone && dj.dj_speech === "夜深了。歡迎來到這裡。我是你的朋友 AJ，今晚不急 — 讓聲音慢慢把你接住。" && auto
+                    ? <span style={{color:"var(--paper-faint)",fontStyle:"italic"}}>AJ 正在感受今晚的氛圍… <span style={{color:"var(--moss)"}}>{countdown}s</span> 後開始說話。<span className="caret"/></span>
+                    : <Typewriter text={dj.dj_speech} speed={72} onDone={()=>setTypedDone(true)} />
+                }
+              </div>
+            </div>
+
+            {sunoSongName && (
+              <div className="next-song">
+                <span className="ns-label">next up · AJ 點歌</span>
+                <span className="ns-name">《{sunoSongName}》</span>
+              </div>
+            )}
+
+            <Meter live={!loading} />
+
+            <div className="controls">
+              <button className="btn-broadcast" onClick={broadcast} disabled={loading}>
+                <span className="glyph" />
+                {loading ? "tuning…" : "broadcast next"}
+              </button>
+              <div className="auto-row">
+                <label className={"toggle " + (auto? "on":"")} onClick={()=>setAuto(a=>!a)}>
+                  <span className="sw" />
+                  <span>auto-pilot</span>
+                </label>
+                {auto && !loading && (
+                  <span className="cd"><span className="n">{countdown}</span>s</span>
+                )}
+              </div>
+            </div>
+
+            {/* 音量 */}
+            <div className="vol-row">
+              <span>vol</span>
+              <input type="range" className="vol" min="0" max="1" step="0.05"
+                value={volume} onChange={e=> setVolume(parseFloat(e.target.value))} />
+              <span>{Math.round(volume * 100)}</span>
+            </div>
+
+            {/* Now Playing */}
+            {isPlayingMusic && (
+              <div className="np">
+                <span className="ni">♪</span>
+                <span className="nn">
+                  {playingLibRef.current
+                    ? (sunoSongName ? `等待《${sunoSongName}》— 先播舊曲` : "新曲生成中 — 播放舊曲墊場")
+                    : (sunoSongName || "AJ × tonight")}
+                </span>
+                <span className="nt">{playingLibRef.current ? "waiting…" : "now playing"}</span>
+              </div>
+            )}
+
+            {!wsConnected && (
+              <div className="err">// 後端未連線 — 確認 server.py 正在執行</div>
+            )}
+            {err && <div className="err">// {err}</div>}
+          </div>
+        </section>
+
+        <section className="col col-right">
+          {/* Tab 切換 */}
+          <div className="tab-bar">
+            <button className={"tab-btn "+(rightTab==="console"?"on":"")} onClick={()=>setRightTab("console")}>console</button>
+            <button className={"tab-btn "+(rightTab==="control"?"on":"")} onClick={()=>setRightTab("control")}>⚙ control</button>
+            <button className={"tab-btn "+(rightTab==="logs"?"on":"")} onClick={()=>setRightTab("logs")} style={logs.some(l=>l.level==="error")?{color:"var(--terra)"}:{}}>logs{logs.some(l=>l.level==="error") ? " !" : ""}</button>
+          </div>
+
+          {/* ── Console Tab ── */}
+          {rightTab === "console" && (
+            <div className="readout">
+              <div className="field analysis">
+                <div className="k"><span>mood read</span><span style={{fontStyle:"italic",fontFamily:"'Cormorant Garamond',serif",fontSize:12,textTransform:"none",letterSpacing:0}}>internal · 不對外</span></div>
+                <div className="v">{dj.analysis || "等候第一輪訊息…"}</div>
+              </div>
+              {(dj.music_prompt || sunoStatus) && (
+                <div className="field">
+                  <div className="k"><span>suno · music</span><span>generative</span></div>
+                  {dj.music_prompt && <div className="prompt-box">{dj.music_prompt}</div>}
+                  {sunoStatus === "waiting" && (
+                    <div className="suno-badge"><span className="sdot"/><span>{sunoSongName ? `「${sunoSongName}」生成中，約 1-3 分鐘` : "Suno 生成中，約 1-3 分鐘"}</span></div>
+                  )}
+                  {sunoStatus === "done" && (
+                    <div className="suno-badge done"><span className="sdot"/><span>{sunoSongName ? `「${sunoSongName}」已完成` : "音樂已完成"}</span></div>
+                  )}
+                </div>
+              )}
+              <div className="field">
+                <div className="k"><span>set ledger</span><span>{ledger.length} entries</span></div>
+                <div className="ledger">
+                  {ledger.map((row,i)=>(
+                    <div className="row" key={i}><span className="t">{row.t}</span><span className="desc">{row.desc}</span></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Control Tab ── */}
+          {rightTab === "control" && (
+            <div className="readout" style={{overflowY:"auto"}}>
+
+              {/* 今晚主題 */}
+              <div className="ctrl-block">
+                <div className="ctrl-lbl">今晚主題 tonight's theme</div>
+                <input className="ctrl-input" type="text" value={sessionTheme}
+                  onChange={e=>setSessionTheme(e.target.value)}
+                  placeholder="深夜加班族、失眠的人、週五夜晚…（選填）" />
+              </div>
+
+              <hr className="ctrl-divider"/>
+
+              {/* 廣播間隔 */}
+              <div className="ctrl-block">
+                <div className="ctrl-lbl">廣播間隔 interval</div>
+                <div className="cpills">
+                  {[[25,"25s"],[30,"30s"],[35,"35s"],[45,"45s"],[60,"1min"],[120,"2min"]].map(([v,lbl])=>(
+                    <button key={v} className={"cpill "+(intervalSec===v?"on":"")} onClick={()=>setIntervalSec(v)}>{lbl}</button>
+                  ))}
+                </div>
+                <div style={{color:"var(--paper-faint)",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",letterSpacing:"0.12em",marginTop:"6px"}}>
+                  暖場 25–35s　·　深夜 45s–1min
+                </div>
+              </div>
+
+              {/* 時段人設 */}
+              <div className="ctrl-block">
+                <div className="ctrl-lbl">時段人設 persona</div>
+                <div className="cpills">
+                  {[["","自動 auto"],["evening","晚安下班了"],["midnight","深夜吧檯"],["late_night","I人的时光"]].map(([v,lbl])=>(
+                    <button key={v} className={"cpill "+(forcedPersona===v?"on":"")} onClick={()=>setForcedPersona(v)}>{lbl}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 音樂風格 */}
+              <div className="ctrl-block">
+                <div className="ctrl-lbl">音樂風格 music style</div>
+                <div className="cpills">
+                  {[["","自動"],["A1","A1 情感療癒"],["A2","A2 專注"],["A3","A3 勵志"],["A4","A4 助眠"],["C1","C1 星光"],["D3","D3 森林"],["E1","E1 深層睡眠"]].map(([v,lbl])=>(
+                    <button key={v} className={"cpill "+(forcedMusic===v?"on":"")} onClick={()=>setForcedMusic(v)}>{lbl}</button>
+                  ))}
+                </div>
+              </div>
+
+              <hr className="ctrl-divider"/>
+
+              {/* Suno */}
+              <div className="ctrl-block">
+                <div className="ctrl-lbl">Suno 音樂生成</div>
+                <div className="cpills">
+                  <button className={"cpill "+(sunoEnabled?"on":"")}  onClick={()=>setSunoEnabled(true)}>開啟</button>
+                  <button className={"cpill "+(!sunoEnabled?"on":"")} onClick={()=>setSunoEnabled(false)}>關閉（僅 TTS）</button>
+                </div>
+              </div>
+
+              <hr className="ctrl-divider"/>
+
+              {/* 主持人音色 */}
+              <div className="ctrl-block">
+                <div className="ctrl-lbl">主持人音色 voice</div>
+                <div className="cpills">
+                  <button className={"cpill "+(voiceId==="claudio"?"on":"")} onClick={()=>setVoiceId("claudio")}>Claudio（試）</button>
+                  <button className={"cpill "+(voiceId==="aj"?"on":"")} onClick={()=>setVoiceId("aj")}>AJ</button>
+                  <button className={"cpill "+(voiceId==="adam"?"on":"")} onClick={()=>setVoiceId("adam")}>Adam</button>
+                </div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--paper-faint)",marginTop:6,letterSpacing:".04em"}}>
+                  {voiceId==="claudio" ? "kbrsaic1zriFXx1pgRYN" : voiceId==="aj" ? "9lHjugDhwqoxA5MhX0az" : "pNInz6obpgDQGcFmaJgB"}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ── Logs Tab ── */}
+          {rightTab === "logs" && (
+            <div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9.5px",letterSpacing:".1em",color:"var(--paper-faint)",textTransform:"uppercase"}}>system log · {logs.length} entries</span>
+                <button onClick={()=>setLogs([])} style={{background:"transparent",border:"1px solid var(--rule)",color:"var(--paper-faint)",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",letterSpacing:".08em",padding:"2px 8px",cursor:"pointer"}}>clear</button>
+              </div>
+              <div className="log-list">
+                {logs.map((row,i)=>(
+                  <div key={i} className={"log-row " + row.level}>
+                    <span className="lt">{row.t}</span>
+                    <span className="lv">{row.level.toUpperCase()}</span>
+                    <span className="lm">{row.msg}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
+        <footer className="foot">
+          <span>© 我是你的朋友 - AJ · broadcasting from somewhere quiet</span>
+          <span className="center">「不完美亦可，慢一點亦可。」</span>
+          <span>v 0.1 · preview</span>
+        </footer>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
